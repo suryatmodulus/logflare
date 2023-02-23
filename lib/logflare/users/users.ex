@@ -70,6 +70,10 @@ defmodule Logflare.Users do
     Repo.preload(user, :endpoint_queries)
   end
 
+  def preload(user, opts) do
+    Repo.preload(user, opts)
+  end
+
   def maybe_preload_bigquery_defaults(user) do
     user =
       case user.bigquery_dataset_id do
@@ -100,6 +104,7 @@ defmodule Logflare.Users do
     |> Repo.update()
   end
 
+  @spec insert_user(map()) :: {:ok, User.t()} | {:error, any()}
   def insert_user(params) do
     %User{}
     |> user_changeset(params)

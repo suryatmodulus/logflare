@@ -207,7 +207,13 @@ config :stripity_stripe,
 
 if config_env() != :test do
   config :goth, json: File.read!("gcloud.json")
+end
 
-  config :logflare, LogflareWeb.Plugs.EnsureSuperUserAuthentication,
-    token: System.get_env("SUPER_USER_AUTHENTICATION_TOKEN")
+unless config_env() in [:dev, :test] do
+  config :logflare, Logflare.Vault,
+    ciphers: [
+      default:
+        {Cloak.Ciphers.AES.GCM,
+         tag: "AES.GCM.V1", key: System.get_env("LOGFLARE_CLOAK_VAULT_KEY") |> Base.decode64!()}
+    ]
 end
