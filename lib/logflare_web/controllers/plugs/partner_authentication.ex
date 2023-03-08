@@ -15,7 +15,7 @@ defmodule LogflareWeb.Plugs.PartnerAuthentication do
   def call(conn, _), do: unauthorized(conn)
 
   defp check_token(partner_token, req_auth_token, conn) do
-    case Partners.get_by_token(partner_token) do
+    case Partners.get_partner_by_token(partner_token) do
       nil -> unauthorized(conn)
       partner -> compare_tokens(conn, partner, req_auth_token)
     end

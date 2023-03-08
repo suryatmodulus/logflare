@@ -8,21 +8,21 @@ defmodule Logflare.Partners do
   alias Logflare.Repo
   alias Logflare.Users
 
-  @spec new(binary()) :: {:ok, Partner.t()} | {:error, any()}
+  @spec new_partner(binary()) :: {:ok, Partner.t()} | {:error, any()}
   @doc """
   Creates a new partner with given name and token to be encrypted
   """
-  def new(name) do
+  def new_partner(name) do
     %Partner{}
     |> Partner.changeset(%{name: name})
     |> Repo.insert()
   end
 
-  @spec list() :: [Partner.t()]
+  @spec list_partners() :: [Partner.t()]
   @doc """
   Lists all partners
   """
-  def list(), do: Repo.all(Partner)
+  def list_partners(), do: Repo.all(Partner)
 
   @spec list_users(Partner.t()) :: [User.t()]
   @doc """
@@ -39,15 +39,15 @@ defmodule Logflare.Partners do
     Repo.all(query)
   end
 
-  @spec get_by_token(binary()) :: Partner.t() | nil
+  @spec get_partner_by_token(binary()) :: Partner.t() | nil
 
   @doc """
   Fetch single entry by given token
   """
-  def get_by_token(token), do: Repo.get_by(Partner, token: token)
+  def get_partner_by_token(token), do: Repo.get_by(Partner, token: token)
 
   @spec create_user(Partner.t(), map()) ::
-          {:ok, %{user: User.t(), user_token: binary()}} | {:error, any()}
+          {:ok, User.t()} | {:error, any()}
   @doc """
   Creates a new user and associates it with given partner
   """
@@ -62,25 +62,29 @@ defmodule Logflare.Partners do
       })
 
     Repo.transaction(fn ->
-      with {:ok, user} <- Users.insert_user(params) do
-        {:ok, _} =
-          partner
-          |> Repo.preload(:users)
-          |> Partner.associate_user_changeset(user)
-          |> Repo.update()
-
-        %{user_token: user_token, user: user}
+      with {:ok, user} <- Users.insert_user(params),
+           {:ok, _} <- associate_user_to_partner(partner, user) do
+        user
+      else
+        {:error, error} -> Repo.rollback(error)
       end
     end)
   end
 
-  @spec delete_by_token(binary()) :: {:ok, Partner.t()} | {:error, any()}
+  defp associate_user_to_partner(partner, user) do
+    partner
+    |> Repo.preload(:users)
+    |> Partner.associate_user_changeset(user)
+    |> Repo.update()
+  end
+
+  @spec delete_partner_by_token(binary()) :: {:ok, Partner.t()} | {:error, any()}
   @doc """
   Deletes a partner given his token
   """
-  def delete_by_token(token) do
+  def delete_partner_by_token(token) do
     token
-    |> get_by_token()
+    |> get_partner_by_token()
     |> Repo.delete()
   end
 

@@ -13,7 +13,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
       conn: conn,
       partner: partner
     } do
-      {:ok, %{user: user}} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
+      {:ok, user} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
 
       %{token: token, auth_token: auth_token} = partner
 
@@ -55,7 +55,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
                |> json_response(201)
 
       assert response["user"]["email"] == String.downcase(email)
-      assert response["user_token"]
+      assert response["api_key"]
     end
 
     test "returns 400 when no email is given", %{
@@ -81,7 +81,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
   describe "get_account/2" do
     test "returns 200 and the user information", %{conn: conn, partner: partner} do
       %{token: token, auth_token: auth_token} = partner
-      {:ok, %{user: user}} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
+      {:ok, user} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
 
       assert response =
                conn
@@ -98,7 +98,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
     end
 
     test "return 401 with the wrong auth token", %{conn: conn, partner: partner} do
-      {:ok, %{user: user}} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
+      {:ok, user} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
 
       assert conn
              |> put_req_header("authorization", "Bearer potato")
@@ -107,8 +107,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
     end
 
     test "return 404 when accessing a user from another partner", %{conn: conn, partner: partner} do
-      {:ok, %{user: user}} =
-        Partners.create_user(insert(:partner), %{"email" => TestUtils.gen_email()})
+      {:ok, user} = Partners.create_user(insert(:partner), %{"email" => TestUtils.gen_email()})
 
       assert conn
              |> put_req_header("authorization", "Bearer #{partner.auth_token}")
@@ -120,7 +119,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
   describe "get_account_usage/2" do
     test "returns 200 and the usage for a given user", %{conn: conn, partner: partner} do
       %{token: token, auth_token: auth_token} = partner
-      {:ok, %{user: user}} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
+      {:ok, user} = Partners.create_user(partner, %{"email" => TestUtils.gen_email()})
       %{count: count} = insert(:billing_counts, user: user)
 
       assert conn
@@ -131,7 +130,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
 
     test "return 401 with the wrong auth token", %{conn: conn, partner: partner} do
       params = %{"email" => TestUtils.gen_email()}
-      {:ok, %{user: user}} = Partners.create_user(partner, params)
+      {:ok, user} = Partners.create_user(partner, params)
 
       assert conn
              |> put_req_header("authorization", "Bearer potato")
@@ -141,7 +140,7 @@ defmodule LogflareWeb.Api.Partner.AccountControllerTest do
 
     test "return 404 when accessing a user from another partner", %{conn: conn, partner: partner} do
       params = %{"email" => TestUtils.gen_email()}
-      {:ok, %{user: user}} = Partners.create_user(insert(:partner), params)
+      {:ok, user} = Partners.create_user(insert(:partner), params)
 
       assert conn
              |> put_req_header("authorization", "Bearer #{partner.auth_token}")

@@ -70,10 +70,6 @@ defmodule Logflare.Users do
     Repo.preload(user, :endpoint_queries)
   end
 
-  def preload(user, opts) do
-    Repo.preload(user, opts)
-  end
-
   def maybe_preload_bigquery_defaults(user) do
     user =
       case user.bigquery_dataset_id do

@@ -14,11 +14,10 @@ defmodule LogflareWeb.Api.Partner.AccountController do
   end
 
   def create(%{assigns: %{partner: partner}} = conn, params) do
-    with {:ok, result} <- Partners.create_user(partner, params),
-         %{user_token: user_token, user: user} <- result do
+    with {:ok, %{api_key: api_key} = user} <- Partners.create_user(partner, params) do
       conn
       |> put_status(201)
-      |> json(%{user: user, user_token: user_token})
+      |> json(%{user: user, api_key: api_key})
     end
   end
 

@@ -43,7 +43,7 @@ defmodule LogflareWeb.Admin.PartnerLiveTest do
     end
 
     test "deletes partner on delete button click", %{conn: conn} do
-      [%{token: token} | others] = insert_list(5, :partner)
+      [%{token: token} | _others] = insert_list(5, :partner)
 
       {:ok, view, _html} = live(conn, "/admin/partner")
 
