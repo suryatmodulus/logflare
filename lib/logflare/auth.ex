@@ -1,8 +1,14 @@
 defmodule Logflare.Auth do
   @moduledoc "Authorization context"
   import Ecto.Query
+
+  alias Logflare.OauthAccessTokens.OauthAccessToken
+  alias Logflare.Partners.Partner
+  alias Logflare.Repo
+  alias Logflare.Teams.Team
+  alias Logflare.User
   alias Phoenix.Token
-  alias Logflare.{Repo, User, Teams.Team, OauthAccessTokens.OauthAccessToken}
+
   @max_age_default 86_400
   defp env_salt, do: Application.get_env(:logflare, LogflareWeb.Endpoint)[:secret_key_base]
   defp env_oauth_config, do: Application.get_env(:logflare, ExOauth2Provider)
@@ -49,6 +55,15 @@ defmodule Logflare.Auth do
 
   def create_access_token(%User{} = user, attrs) do
     with {:ok, token} = ExOauth2Provider.AccessTokens.create_token(user, %{}, env_oauth_config()) do
+      token
+      |> Ecto.Changeset.cast(attrs, [:scopes, :description])
+      |> Repo.update()
+    end
+  end
+
+  def create_access_token(%Partner{} = partner, attrs) do
+    with {:ok, token} =
+           ExOauth2Provider.AccessTokens.create_token(partner, %{}, env_oauth_config()) do
       token
       |> Ecto.Changeset.cast(attrs, [:scopes, :description])
       |> Repo.update()
