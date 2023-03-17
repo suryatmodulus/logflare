@@ -415,8 +415,15 @@ defmodule Logflare.SqlV2 do
           token =
             source_mapping
             |> Map.get(name)
-            |> Map.get(:token)
+            |> then(fn
+              # handle cases when source mapping is empty
+              nil -> nil
+              source -> Map.get(source, :token)
+            end)
             |> case do
+              nil ->
+                nil
+
               v when is_atom(v) ->
                 Atom.to_string(v)
 
@@ -424,8 +431,13 @@ defmodule Logflare.SqlV2 do
                 v
             end
 
-          {name, token}
+          if token do
+            {name, token}
+          else
+            nil
+          end
         end)
+        |> Enum.filter(fn kv -> kv != nil end)
         |> Map.new()
       end
 

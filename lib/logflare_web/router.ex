@@ -166,6 +166,11 @@ defmodule LogflareWeb.Router do
     live "/:id/edit", EndpointsLive, :edit
   end
 
+  scope "/alerts", LogflareWeb do
+    pipe_through([:browser, :require_auth])
+    live "/", AlertsLive, :index
+  end
+
   scope "/sources", LogflareWeb do
     pipe_through([:browser])
 
