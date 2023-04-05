@@ -21,7 +21,7 @@ steps:
     entrypoint: 'sh'
     args:
       [
-        "-c", "docker build --build-arg TAG_VERSION=$(cat ./VERSION) -t gcr.io/$PROJECT_ID/logflare_app:$COMMIT_SHA -t gcr.io/$PROJECT_ID/logflare_app:latest -f docker/secret_setup.Dockerfile .",
+        "-c", "docker build --build-arg TAG_VERSION=$(cat ./VERSION) -t gcr.io/$PROJECT_ID/logflare_app:$COMMIT_SHA -t gcr.io/$PROJECT_ID/logflare_app:latest -f cloudbuild/secret_setup.Dockerfile .",
       ]
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/$PROJECT_ID/logflare_app:$COMMIT_SHA"]
